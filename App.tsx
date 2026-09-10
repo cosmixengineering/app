@@ -12,6 +12,7 @@ import SplashScreen from './src/screens/splash/SplashScreen';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import SignupScreen from './src/screens/auth/SignupScreen';
 import OTPScreen from './src/screens/auth/OTPScreen';
+import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
 import AppNavigator from './src/navigation/AppNavigator';
 
 const RootStack = createNativeStackNavigator();
@@ -67,6 +68,7 @@ const App = () => {
           <RootStack.Screen name="Login" component={LoginScreen} />
           <RootStack.Screen name="Signup" component={SignupScreen} />
           <RootStack.Screen name="OTP" component={OTPScreen} />
+          <RootStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <RootStack.Screen name="MainApp" component={AppNavigator} />
         </RootStack.Navigator>
       </NavigationContainer>

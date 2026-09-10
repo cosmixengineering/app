@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,8 +18,9 @@ import { useTranslation } from 'react-i18next';
 /* Payment removed — free property listing */
 import { launchImageLibrary } from 'react-native-image-picker';
 import CustomButton from '../../components/CustomButton';
+import CityDropdown from '../../components/CityDropdown';
 import { addProperty, updateProperty } from '../../api/propertyApi';
-import { getDistricts, getAreas } from '../../api/districtApi';
+import { getDistricts } from '../../api/districtApi';
 import { propertyTypes } from '../../constants/appConstants';
 import authStore from '../../store/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,8 +57,23 @@ const AddPropertyScreen = ({ navigation, route }) => {
 
     // Dynamic Location States
     const [districts, setDistricts] = useState([]);
-    const [areas, setAreas] = useState([]); 
-    const [locLoading, setLocLoading] = useState(false); 
+    const [locLoading, setLocLoading] = useState(true);
+    const [locError, setLocError] = useState(false);
+
+    const loadDistricts = useCallback(async () => {
+        setLocLoading(true);
+        setLocError(false);
+        try {
+            const response = await getDistricts();
+            const data = [response.data?.data, response.data?.districts, response.data].find(Array.isArray);
+            if (!data) { throw new Error('Invalid city list'); }
+            setDistricts(data);
+        } catch (error) {
+            setLocError(true);
+        } finally {
+            setLocLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -69,21 +84,8 @@ const AddPropertyScreen = ({ navigation, route }) => {
         };
         checkAuth();
 
-        const loadInitialData = async () => {
-            try {
-                const [districtRes, areaRes] = await Promise.all([
-                    getDistricts(),
-                    getAreas()
-                ]);
-                // SAFE INITIALIZATION FOR DISTRICTS
-                setDistricts(Array.isArray(districtRes.data?.data) ? districtRes.data.data : Array.isArray(districtRes.data?.districts) ? districtRes.data.districts : Array.isArray(districtRes.data) ? districtRes.data : []);
-                setAreas(areaRes.data?.data || areaRes.data?.message || areaRes.data || []);
-            } catch (e) {
-                console.error('AddProperty Init Error:', e);
-            }
-        };
-        loadInitialData();
-    }, [navigation]);
+        loadDistricts();
+    }, [navigation, loadDistricts]);
 
     const updateField = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -207,11 +209,10 @@ const AddPropertyScreen = ({ navigation, route }) => {
                 });
             }
 
-            let response;
             if (editMode) {
-                response = await updateProperty(propertyData.id || propertyData._id, formData);
+                await updateProperty(propertyData.id || propertyData._id, formData);
             } else {
-                response = await addProperty(formData);
+                await addProperty(formData);
             }
 
             setLoading(false);
@@ -391,15 +392,9 @@ const AddPropertyScreen = ({ navigation, route }) => {
                         <Text style={styles.stepDesc}>{t('property.locationFinishDesc')}</Text>
 
                         <Text style={styles.sectionLabel}>{t('property.cityDistrict')} *</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker selectedValue={form.city} onValueChange={(itemValue) => updateField('city', itemValue)} style={styles.picker}>
-                                <Picker.Item label="Select City" value="" color={Colors.textSecondary} />
-                                {districts.map((district, index) => {
-                                    const labelStr = typeof district === 'string' ? district : (district?.name || district?.city || district?.district || 'Unknown');
-                                    return <Picker.Item key={index} label={labelStr} value={labelStr} />;
-                                })}
-                            </Picker>
-                        </View>
+                        <CityDropdown districts={districts} value={form.city}
+                            onChange={city => updateField('city', city)}
+                            loading={locLoading} error={locError} onRetry={loadDistricts} />
 
                         <Text style={styles.sectionLabel}>{t('property.area')} *</Text>
                         <TextInput style={styles.input} placeholder={t('property.areaPlaceholder')} value={form.area} onChangeText={v => updateField('area', v)} />
@@ -441,8 +436,6 @@ const styles = StyleSheet.create({
     stepDesc: { fontSize: 14, color: Colors.textSecondary, marginBottom: 25 },
     sectionLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, marginBottom: 12, marginTop: 10 },
     input: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: Colors.textPrimary, fontFamily: 'Inter-Regular', marginBottom: 20 },
-    pickerContainer: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, marginBottom: 20, overflow: 'hidden' },
-    picker: { height: 50, width: '100%', color: Colors.textPrimary },
     textArea: { height: 120, paddingTop: 14 },
     typeContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
     typeChip: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, backgroundColor: Colors.backgroundSecondary, borderWidth: 1, borderColor: Colors.border },

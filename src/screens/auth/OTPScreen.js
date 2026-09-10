@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // 6 boxes + 5 gaps, fit within screen with 48px horizontal padding
 const BOX_SIZE = Math.min(48, Math.floor((SCREEN_WIDTH - 48 - 5 * 10) / 6));
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../../constants/colors';
 import CustomButton from '../../components/CustomButton';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -42,6 +41,7 @@ const OTPScreen = ({ route, navigation }) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resending, setResending] = useState(false);
     const [timer, setTimer] = useState(30);
     const inputRefs = useRef([]);
 
@@ -69,8 +69,9 @@ const OTPScreen = ({ route, navigation }) => {
     };
 
     const handleVerify = async () => {
+        if (loading || resending) { return; }
         const otpString = otp.join('');
-        if (otpString.length < OTP_LENGTH) {
+        if (!/^\d{6}$/.test(otpString)) {
             Alert.alert(t('auth.invalidOTP'), t('auth.invalidOTPDesc'));
             return;
         }
@@ -83,8 +84,12 @@ const OTPScreen = ({ route, navigation }) => {
                     setLoading(false);
                     return;
                 }
+                if (password.trim().length < 6) {
+                    Alert.alert(t('auth.passwordError'), t('auth.passwordTooShort', { defaultValue: 'Password must be at least 6 characters.' }));
+                    return;
+                }
                 await resetPassword({ email, otp: otpString, password, confirmPassword });
-                Alert.alert(t('common.submit'), t('auth.verifiedDesc'), [
+                Alert.alert(t('common.success'), t('auth.passwordResetSuccess', { defaultValue: 'Your password has been reset. Please sign in with your new password.' }), [
                     { text: t('auth.login'), onPress: () => navigation.navigate('Login') }
                 ]);
             } else {
@@ -123,6 +128,8 @@ const OTPScreen = ({ route, navigation }) => {
     };
 
     const handleResend = async () => {
+        if (resending || loading || timer > 0) { return; }
+        setResending(true);
         try {
             await forgotPassword(email);
             setTimer(30);
@@ -130,6 +137,8 @@ const OTPScreen = ({ route, navigation }) => {
         } catch (error) {
             const message = error.response?.data?.message || 'Failed to resend OTP. Please try again later.';
             Alert.alert('Error', message);
+        } finally {
+            setResending(false);
         }
     };
 
@@ -139,7 +148,7 @@ const OTPScreen = ({ route, navigation }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <StatusBar backgroundColor={Colors.background} barStyle="dark-content" />
 
-            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
                     <TouchableOpacity
                         style={styles.backButton}
@@ -209,6 +218,7 @@ const OTPScreen = ({ route, navigation }) => {
                     title={mode === 'forgot' ? t('auth.resetAndContinue') : t('auth.verifyAndLogin')}
                     onPress={handleVerify}
                     loading={loading}
+                    disabled={resending}
                     size="large"
                     style={styles.verifyButton}
                     icon="checkmark-circle-outline"
@@ -220,8 +230,8 @@ const OTPScreen = ({ route, navigation }) => {
                             {t('auth.resendIn')}<Text style={styles.timerBold}>{timer}s</Text>
                         </Text>
                     ) : (
-                        <TouchableOpacity onPress={handleResend}>
-                            <Text style={styles.resendText}>{t('auth.resendCode')}</Text>
+                        <TouchableOpacity onPress={handleResend} disabled={resending || loading} accessibilityRole="button" style={styles.resendButton}>
+                            <Text style={styles.resendText}>{resending ? t('auth.sendingCode', { defaultValue: 'Sending…' }) : t('auth.resendCode')}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -349,6 +359,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: Colors.primary,
     },
+    resendButton: { minHeight: 48, justifyContent: 'center', paddingHorizontal: 16 },
 });
 
 export default OTPScreen;

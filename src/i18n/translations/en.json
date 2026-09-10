@@ -105,6 +105,7 @@
         "liveTourDesc": "Watching real-time walkthrough with our elite agents."
     },
     "auth": {
+        "forgotPassword": "Forgot Password?",
         "login": "Login",
         "signup": "Sign Up",
         "logout": "Logout",

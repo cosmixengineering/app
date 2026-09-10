@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View, Text, StyleSheet, Image, StatusBar, KeyboardAvoidingView,
-    Platform, ScrollView, Alert, Dimensions, TouchableOpacity, Animated
+    Platform, ScrollView, Alert, TouchableOpacity, Animated, Keyboard
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -11,8 +11,6 @@ import FloatingLabelInput from '../../components/FloatingLabelInput';
 import AnimatedButton from '../../components/AnimatedButton';
 import { signin } from '../../api/authApi';
 import authStore from '../../store/authStore';
-
-const { width } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
     const { t } = useTranslation();
@@ -44,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
                 Animated.spring(formSlide, { toValue: 0, tension: 20, friction: 7, useNativeDriver: true })
             ]),
         ]).start();
-    }, []);
+    }, [formAnim, formSlide, logoAnim, logoSlide, titleAnim, titleSlide]);
 
     const handleLogin = async () => {
         const trimmedPhone = (phone || '').trim();
@@ -100,7 +98,7 @@ const LoginScreen = ({ navigation }) => {
             <ScrollView contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 20 }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
                 {/* Decorative Background */}
-                <View style={styles.topDecoration}>
+                <View pointerEvents="none" style={styles.topDecoration}>
                     <LinearGradient colors={[Colors.primarySoft, Colors.background]} style={styles.decorCircle} />
                     <LinearGradient colors={[Colors.accentSoft, Colors.background]} style={styles.decorCircleSmall} />
                 </View>
@@ -131,7 +129,7 @@ const LoginScreen = ({ navigation }) => {
                     />
 
                     <FloatingLabelInput
-                        label="Password"
+                        label={t('auth.password')}
                         value={password}
                         onChangeText={setPassword}
                         icon="lock-closed-outline"
@@ -139,17 +137,22 @@ const LoginScreen = ({ navigation }) => {
                         style={{ marginBottom: 16 }}
                     />
 
-                    <View style={{ width: '100%', alignItems: 'flex-end', marginBottom: 20 }}>
-                        <Text 
-                            onPress={() => navigation.navigate('ForgotPassword')}
-                            style={{ 
-                                color: Colors.primary, 
-                                fontWeight: '700', 
-                                fontSize: 15, 
-                                padding: 10 
-                            }}>
-                            {t('auth.forgotPassword') !== 'auth.forgotPassword' ? t('auth.forgotPassword') : 'Forgot Password?'}
-                        </Text>
+                    <View style={styles.forgotPasswordRow}>
+                        <TouchableOpacity
+                            testID="forgot-password-button"
+                            accessibilityRole="button"
+                            accessibilityLabel={t('auth.forgotPassword', { defaultValue: 'Forgot Password?' })}
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                navigation.navigate('ForgotPassword');
+                            }}
+                            activeOpacity={0.7}
+                            hitSlop={8}
+                            style={styles.forgotPasswordButton}>
+                            <Text style={styles.forgotPasswordText}>
+                                {t('auth.forgotPassword', { defaultValue: 'Forgot Password?' })}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     <AnimatedButton
@@ -204,6 +207,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1, shadowRadius: 32, borderWidth: 1, borderColor: Colors.borderLight,
     },
     signupContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 30 },
+    forgotPasswordRow: { alignItems: 'flex-end', marginBottom: 20 },
+    forgotPasswordButton: { minHeight: 48, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 12 },
+    forgotPasswordText: { color: Colors.primaryDark, fontWeight: '700', fontSize: 15 },
     noAccountText: { color: Colors.textSecondary, fontSize: 14, fontWeight: '500' },
     signupLink: { color: Colors.primary, fontSize: 14, fontWeight: '800' },
     footer: { marginTop: 40, marginBottom: 40, paddingHorizontal: 40 },

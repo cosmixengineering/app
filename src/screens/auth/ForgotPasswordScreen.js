@@ -18,6 +18,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
 
     const handleForgotPassword = async () => {
+        if (loading) { return; }
         const trimmedIdentifier = (identifier || '').trim();
 
         if (!trimmedIdentifier) {
@@ -54,7 +55,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
                     <View style={styles.lockIconWrapper}>
                         <Icon name="lock-closed-outline" size={40} color={Colors.primary} />
                     </View>
-                    <Text style={styles.title}>Forgot Password?</Text>
+                    <Text style={styles.title}>{t('auth.forgotPassword', { defaultValue: 'Forgot Password?' })}</Text>
                     <Text style={styles.subtitle}>Enter your email or phone number to receive a password reset OTP.</Text>
                 </View>
 
