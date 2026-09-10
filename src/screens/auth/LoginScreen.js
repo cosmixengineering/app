@@ -141,10 +141,12 @@ const LoginScreen = ({ navigation }) => {
 
                     <TouchableOpacity 
                         onPress={() => navigation.navigate('ForgotPassword')}
-                        style={{ alignItems: 'flex-end', marginBottom: 24 }}
+                        style={{ alignItems: 'flex-end', marginBottom: 24, zIndex: 10 }}
+                        activeOpacity={0.6}
+                        hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                     >
-                        <Text style={{ color: Colors.primary, fontWeight: '600', fontSize: 14 }}>
-                            {t('auth.forgotPassword') || 'Forgot Password?'}
+                        <Text style={{ color: Colors.primary, fontWeight: '600', fontSize: 14, paddingVertical: 5 }}>
+                            {t('auth.forgotPassword') !== 'auth.forgotPassword' ? t('auth.forgotPassword') : 'Forgot Password?'}
                         </Text>
                     </TouchableOpacity>
 
