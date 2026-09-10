@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "920118489995",
+    "project_id": "bookgrocer-929d9",
+    "storage_bucket": "bookgrocer-929d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920118489995:android:1227f07b567b04db87b58e",
+        "android_client_info": {
+          "package_name": "com.project.sspropertyguru"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "920118489995-51gp1jsrnlhv8bp85tl5uj1ulla0729a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLMc7V-bkM-s9NE-Z3P-EHHjhoFhk0YQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "920118489995-51gp1jsrnlhv8bp85tl5uj1ulla0729a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
