@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     stepNumberActive: { color: Colors.textWhite },
     stepLine: { width: 40, height: 2, backgroundColor: Colors.border, marginHorizontal: 5 },
     stepLineActive: { backgroundColor: Colors.primary },
-    stepContent: { animationDuration: '400ms' },
+    stepContent: { paddingTop: 10 },
     stepTitle: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary, marginBottom: 8 },
     stepDesc: { fontSize: 14, color: Colors.textSecondary, marginBottom: 25 },
     sectionLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, marginBottom: 12, marginTop: 10 },

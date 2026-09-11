@@ -188,7 +188,7 @@ const BuyPropertyScreen = ({ navigation, route }) => {
                 <FlatList
                     data={properties}
                     renderItem={({ item, index }) => (
-                        <View style={{ animationDuration: `${(index % 5 + 1) * 200}ms` }}>
+                        <View>
                             <PropertyCard
                                 property={item}
                                 onPress={() => navigation.navigate('PropertyDetail', { property: item })}
