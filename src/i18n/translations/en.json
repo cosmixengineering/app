@@ -1,4 +1,4 @@
-{
+﻿{
     "common": {
         "appName": "SS Property Guru",
         "all": "All",
@@ -76,7 +76,7 @@
         "locationPlaceholder": "e.g. Bandra, Mumbai",
         "specificRequirement": "Specific Requirement",
         "requirementPlaceholder": "Describe size, floor, facing, amenities etc.",
-        "postSuccess": "Submitted Successfully! ✅",
+        "postSuccess": "Submitted Successfully! âœ…",
         "postSuccessDesc": "Your requirement has been posted. Agents will contact you with matching properties.",
         "incompleteForm": "Incomplete Form",
         "fillBasicDetails": "Please fill name, phone and basic details.",
@@ -148,7 +148,7 @@
         "otpSuccessDesc": "Welcome to SS Property Guru!",
         "agreeToSignup": "By signing up, you agree to our ",
         "resetPassword": "Reset Password",
-        "verifyEmail": "Verify Email",
+        "verifyNumber": "Verify Number",
         "resendIn": "Resend code in ",
         "verifyAndLogin": "Verify & Login",
         "resetAndContinue": "Reset & Continue",

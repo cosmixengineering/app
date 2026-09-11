@@ -160,13 +160,13 @@ const OTPScreen = ({ route, navigation }) => {
                 <View style={styles.titleSection}>
                     <View style={styles.lockIconWrapper}>
                         <Icon
-                            name={mode === 'forgot' ? "key-outline" : "mail-open-outline"}
+                            name={mode === 'forgot' ? "key-outline" : "chatbubble-ellipses-outline"}
                             size={40}
                             color={Colors.primary}
                         />
                     </View>
                     <Text style={styles.title}>
-                        {mode === 'forgot' ? t('auth.resetPassword') : t('auth.verifyEmail')}
+                        {mode === 'forgot' ? t('auth.resetPassword') : t('auth.verifyNumber')}
                     </Text>
                     <Text style={styles.subtitle}>
                         {t('auth.otpSubtitle')}{'\n'}
