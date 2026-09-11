@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     stepTitle: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary, marginBottom: 8 },
     stepDesc: { fontSize: 14, color: Colors.textSecondary, marginBottom: 25 },
     sectionLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, marginBottom: 12, marginTop: 10 },
-    input: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: Colors.textPrimary, fontFamily: 'Inter-Regular', marginBottom: 20 },
+    input: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: Colors.textPrimary, marginBottom: 20 },
     textArea: { height: 120, paddingTop: 14 },
     typeContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
     typeChip: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, backgroundColor: Colors.backgroundSecondary, borderWidth: 1, borderColor: Colors.border },
