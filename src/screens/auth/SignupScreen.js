@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
     View, Text, StyleSheet, StatusBar, KeyboardAvoidingView,
-    Platform, ScrollView, Alert, TouchableOpacity, Animated
+    Platform, ScrollView, Alert, TouchableOpacity, Animated, Image
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { launchImageLibrary } from 'react-native-image-picker';
 import Colors from '../../constants/colors';
 import FloatingLabelInput from '../../components/FloatingLabelInput';
 import AnimatedButton from '../../components/AnimatedButton';
 import { signup } from '../../api/authApi';
 import authStore from '../../store/authStore';
 import GetLocation from 'react-native-get-location';
+
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 const SignupScreen = ({ navigation }) => {
     const { t } = useTranslation();
@@ -20,11 +24,14 @@ const SignupScreen = ({ navigation }) => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [avatar, setAvatar] = useState(null);
     const [loading, setLoading] = useState(false);
 
     // Staggered Animations
     const headerAnim = useRef(new Animated.Value(0)).current;
     const headerSlide = useRef(new Animated.Value(-30)).current;
+    const avatarAnim = useRef(new Animated.Value(0)).current;
+    const avatarSlide = useRef(new Animated.Value(20)).current;
     const field1Anim = useRef(new Animated.Value(0)).current;
     const field1Slide = useRef(new Animated.Value(20)).current;
     const field2Anim = useRef(new Animated.Value(0)).current;
@@ -41,6 +48,10 @@ const SignupScreen = ({ navigation }) => {
             Animated.parallel([
                 Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
                 Animated.spring(headerSlide, { toValue: 0, tension: 20, friction: 6, useNativeDriver: true })
+            ]),
+            Animated.parallel([
+                Animated.timing(avatarAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+                Animated.spring(avatarSlide, { toValue: 0, tension: 30, friction: 7, useNativeDriver: true })
             ]),
             Animated.parallel([
                 Animated.timing(field1Anim, { toValue: 1, duration: 500, useNativeDriver: true }),
@@ -66,6 +77,19 @@ const SignupScreen = ({ navigation }) => {
     }, []);
 
     const isSubmitting = useRef(false);
+
+    const handlePickImage = () => {
+        launchImageLibrary({ mediaType: 'photo', quality: 0.7 }, (response) => {
+            if (response.assets && response.assets.length > 0) {
+                const file = response.assets[0];
+                if (file.fileSize && file.fileSize > 5 * 1024 * 1024) {
+                    Alert.alert('Image Too Large', 'Please select an image under 5MB.');
+                    return;
+                }
+                setAvatar(file);
+            }
+        });
+    };
 
     const handleSignup = async () => {
         if (loading || isSubmitting.current) return;
@@ -130,13 +154,26 @@ const SignupScreen = ({ navigation }) => {
                 console.warn('Location Capture Failed:', err.code, err.message);
             }
 
-            const response = await signup({
-                name: trimmedName,
-                email: `${trimmedPhone}@sspropertyguru.com`,
-                contact: trimmedPhone,
-                password: trimmedPassword,
-                ...locationData,
-            });
+            const formData = new FormData();
+            formData.append('name', trimmedName);
+            formData.append('email', `${trimmedPhone}@sspropertyguru.com`);
+            formData.append('contact', trimmedPhone);
+            formData.append('password', trimmedPassword);
+            formData.append('role', 'user');
+            formData.append('latitude', locationData.latitude);
+            formData.append('longitude', locationData.longitude);
+
+            if (avatar) {
+                formData.append('avatar', {
+                    uri: Platform.OS === 'android' ? avatar.uri : avatar.uri.replace('file://', ''),
+                    type: avatar.type || 'image/jpeg',
+                    name: avatar.fileName || `avatar_${Date.now()}.jpg`,
+                });
+            } else {
+                formData.append('avatar', DEFAULT_AVATAR);
+            }
+
+            const response = await signup(formData);
 
             if (response.data) {
                 const devOtp = response.data?.data?.devOtp;
@@ -177,6 +214,22 @@ const SignupScreen = ({ navigation }) => {
                 <Animated.View style={[styles.header, { opacity: headerAnim, transform: [{ translateY: headerSlide }] }]}>
                     <Text style={styles.title}>{t('auth.createAccount')}</Text>
                     <Text style={styles.subtitle}>{t('auth.signupSubtitle')}</Text>
+                </Animated.View>
+
+                <Animated.View style={[styles.avatarSection, { opacity: avatarAnim, transform: [{ translateY: avatarSlide }] }]}>
+                    <TouchableOpacity onPress={handlePickImage} style={styles.avatarWrapper} activeOpacity={0.7}>
+                        {avatar ? (
+                            <Image source={{ uri: avatar.uri }} style={styles.avatarImage} />
+                        ) : (
+                            <View style={[styles.avatarImage, styles.avatarPlaceholder]}>
+                                <Icon name="person" size={50} color="#B0B0B0" />
+                            </View>
+                        )}
+                        <View style={styles.cameraIcon}>
+                            <Icon name="camera" size={18} color={Colors.textWhite} />
+                        </View>
+                    </TouchableOpacity>
+                    <Text style={styles.avatarHint}>Add Profile Photo</Text>
                 </Animated.View>
 
                 <View style={styles.card}>
@@ -279,6 +332,31 @@ const styles = StyleSheet.create({
     footer: { marginTop: 30, marginBottom: 40, paddingHorizontal: 20 },
     footerText: { fontSize: 12, color: Colors.textLight, textAlign: 'center', lineHeight: 18 },
     link: { color: Colors.primary, fontWeight: '700' },
+    avatarSection: { alignItems: 'center', marginBottom: 24 },
+    avatarWrapper: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        overflow: 'hidden',
+        backgroundColor: Colors.surfaceSecondary,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+    },
+    avatarImage: { width: '100%', height: '100%' },
+    avatarPlaceholder: { justifyContent: 'center', alignItems: 'center', backgroundColor: '#E8E8E8' },
+    cameraIcon: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: Colors.primary,
+        padding: 7,
+        borderTopLeftRadius: 14,
+        borderBottomRightRadius: 14,
+    },
+    avatarHint: { marginTop: 10, fontSize: 13, color: Colors.primary, fontWeight: '600' },
 });
 
 export default SignupScreen;
