@@ -34,15 +34,15 @@ const AddPropertyScreen = ({ navigation, route }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [form, setForm] = useState({
         title: propertyData?.title || '',
-        price: propertyData?.price?.toString() || '',
+        price: propertyData?.price?.toString().replace(/[^0-9.]/g, '') || '',
         city: propertyData?.city || '',
         area: propertyData?.area || '',
         description: propertyData?.description || '',
         category: propertyData?.category || 'Residential',
         sellingType: propertyData?.sellingType || 'Sale',
-        bedrooms: propertyData?.bedrooms?.toString() || '',
-        bathrooms: propertyData?.bathrooms?.toString() || '',
-        areaSize: propertyData?.areaSize?.toString() || propertyData?.sqft?.toString() || '',
+        bedrooms: propertyData?.bedrooms?.toString().replace(/[^0-9.]/g, '') || '',
+        bathrooms: propertyData?.bathrooms?.toString().replace(/[^0-9.]/g, '') || '',
+        areaSize: propertyData?.areaSize?.toString().replace(/[^0-9.]/g, '') || propertyData?.sqft?.toString().replace(/[^0-9.]/g, '') || '',
         features: Array.isArray(propertyData?.features) ? propertyData.features : [],
     });
     
@@ -184,7 +184,11 @@ const AddPropertyScreen = ({ navigation, route }) => {
                 if (key === 'features') {
                     formData.append(key, JSON.stringify(form[key]));
                 } else if (form[key]) {
-                    formData.append(key, form[key].toString());
+                    if (['price', 'bedrooms', 'bathrooms', 'areaSize', 'sqft'].includes(key)) {
+                        formData.append(key, form[key].toString().replace(/[^0-9.]/g, ''));
+                    } else {
+                        formData.append(key, form[key].toString());
+                    }
                 }
             });
 
