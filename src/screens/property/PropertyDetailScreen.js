@@ -29,7 +29,7 @@ const PropertyDetailScreen = ({ route, navigation }) => {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const { property: initialProperty } = route.params || {};
-    const [property, setProperty] = useState(initialProperty ? normalizeProperty(initialProperty) : {});
+    const [property, setProperty] = useState(initialProperty ? normalizeProperty(initialProperty, t) : {});
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
 

@@ -185,7 +185,12 @@ const DashboardScreen = ({ navigation }) => {
                                     style={styles.propertyItem}
                                     onPress={() => navigation.navigate('PropertyDetail', { property })}>
                                     <Image
-                                        source={{ uri: property.images?.[0] || 'https://via.placeholder.com/100' }}
+                                        source={{ uri: (() => {
+                                            const img = property.images?.[0];
+                                            if (!img) return 'https://via.placeholder.com/100';
+                                            if (typeof img === 'string') return img;
+                                            return img.url || img.secure_url || 'https://via.placeholder.com/100';
+                                        })() }}
                                         style={styles.propertyImage}
                                     />
                                     <View style={styles.propertyInfo}>

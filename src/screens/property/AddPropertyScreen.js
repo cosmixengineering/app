@@ -106,31 +106,39 @@ const AddPropertyScreen = ({ navigation, route }) => {
     const prevStep = () => setCurrentStep(prev => prev - 1);
 
     const handlePickImage = async () => {
-        const result = await launchImageLibrary({
-            mediaType: 'photo',
-            selectionLimit: 4 - images.length,
-            quality: 0.8,
-        });
+        try {
+            const result = await launchImageLibrary({
+                mediaType: 'photo',
+                selectionLimit: 4 - images.length,
+                quality: 0.8,
+            });
 
-        if (result.assets) {
-            const newImages = result.assets.map(asset => asset.uri);
-            setImages(prev => [...prev, ...newImages].slice(0, 4));
+            if (result.assets) {
+                const newImages = result.assets.map(asset => asset.uri);
+                setImages(prev => [...prev, ...newImages].slice(0, 4));
+            }
+        } catch (error) {
+            console.error('Image picker error:', error);
         }
     };
 
     const handlePickVideo = async () => {
-        const result = await launchImageLibrary({
-            mediaType: 'video',
-            selectionLimit: 1,
-        });
+        try {
+            const result = await launchImageLibrary({
+                mediaType: 'video',
+                selectionLimit: 1,
+            });
 
-        if (result.assets && result.assets.length > 0) {
-            const asset = result.assets[0];
-            if (asset.fileSize > 30 * 1024 * 1024) {
-                Alert.alert(t('common.error'), t('property.uploadVideoDesc'));
-                return;
+            if (result.assets && result.assets.length > 0) {
+                const asset = result.assets[0];
+                if (asset.fileSize > 30 * 1024 * 1024) {
+                    Alert.alert(t('common.error'), t('property.uploadVideoDesc'));
+                    return;
+                }
+                setVideo(asset.uri);
             }
-            setVideo(asset.uri);
+        } catch (error) {
+            console.error('Video picker error:', error);
         }
     };
 
@@ -227,7 +235,7 @@ const AddPropertyScreen = ({ navigation, route }) => {
                         {
                             text: 'OK',
                             onPress: () => {
-                                navigation.navigate('Sell', { screen: 'MyProperties' });
+                                navigation.getParent()?.navigate('Sell', { screen: 'MyProperties' }) || navigation.navigate('MyProperties');
                             },
                         },
                     ],
@@ -435,7 +443,7 @@ const styles = StyleSheet.create({
     stepTitle: { fontSize: 24, fontWeight: '800', color: Colors.textPrimary, marginBottom: 8 },
     stepDesc: { fontSize: 14, color: Colors.textSecondary, marginBottom: 25 },
     sectionLabel: { fontSize: 14, fontWeight: '600', color: Colors.textPrimary, marginBottom: 12, marginTop: 10 },
-    input: { backgroundColor: Colors.white, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: Colors.textPrimary, marginBottom: 20 },
+    input: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 16, color: Colors.textPrimary, marginBottom: 20 },
     textArea: { height: 120, paddingTop: 14 },
     typeContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
     typeChip: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, backgroundColor: Colors.backgroundSecondary, borderWidth: 1, borderColor: Colors.border },
